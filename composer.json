@@ -1,0 +1,13 @@
+{
+    "name": "jcem/jcem-admin-ui",
+    "description": "A Wordpress admin UI generator for plugins",
+    "type": "library",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Paciente8159",
+            "email": "paciente8159@gmail.com"
+        }
+    ],
+    "require": {}
+}
