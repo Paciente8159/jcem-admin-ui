@@ -4,8 +4,8 @@
     "type": "library",
     "license": "GPLv3",
     "autoload": {
-        "psr-4": {
-            "Paciente8159\\JcemAdminUi\\": "src/"
+        "autoload": {
+            "files": ["src/jcem-admin-ui.php"]
         }
     },
     "authors": [
