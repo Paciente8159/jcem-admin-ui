@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
  * Rename this for your plugin and update it as you release new versions.
  */
 define('JCEM_ADMIN_UI_PATH', plugin_dir_path(__FILE__));
-define('JCEM_ADMIN_UI_URL', plugins_url(__FILE__));
+define('JCEM_ADMIN_UI_URL', plugin_dir_url(__FILE__));
 
 register_activation_hook(__FILE__, function(){
 

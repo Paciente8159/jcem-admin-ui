@@ -1,1 +1,2 @@
-/vendor/
+# Ignore compressed files
+*.zip
