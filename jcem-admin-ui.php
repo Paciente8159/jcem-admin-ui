@@ -16,7 +16,7 @@
  * Plugin Name:       JCEM Admin UI
  * Plugin URI:        https://github.com/Paciente8159
  * Description:       This is Admin UI render for JCEM plugins.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            Joao Martins
  * Author URI:        https://github.com/Paciente8159
  * License:           GPL-3.0+
@@ -27,7 +27,7 @@
 
 // If this file is called directly, abort.
 if (!defined('ABSPATH')) {
-    die;
+	die;
 }
 
 /**
@@ -38,18 +38,16 @@ if (!defined('ABSPATH')) {
 define('JCEM_ADMIN_UI_PATH', plugin_dir_path(__FILE__));
 define('JCEM_ADMIN_UI_URL', plugin_dir_url(__FILE__));
 
-register_activation_hook(__FILE__, function(){
-
+register_activation_hook(__FILE__, function () {
 });
 
-register_deactivation_hook(__FILE__, function(){
-	
+register_deactivation_hook(__FILE__, function () {
 });
 
 add_action('admin_enqueue_scripts', function () {
-    wp_enqueue_style('jcem_admin_ui_styles', JCEM_ADMIN_UI_URL . 'assets/css/jcem-admin-ui.css');
-    wp_enqueue_script('jcem_admin_ui_scripts', JCEM_ADMIN_UI_URL . 'assets/js/jcem-admin-ui.js', true);
-    wp_enqueue_media();
+	wp_enqueue_style('jcem_admin_ui_styles', JCEM_ADMIN_UI_URL . 'assets/css/jcem-admin-ui.css');
+	wp_enqueue_script('jcem_admin_ui_scripts', JCEM_ADMIN_UI_URL . 'assets/js/jcem-admin-ui.js', true);
+	wp_enqueue_media();
 });
 
 if (!function_exists('jcem_admin_ui_render_field_label')) {
@@ -71,6 +69,13 @@ if (!function_exists('jcem_admin_ui_get_value')) {
 if (!function_exists('jcem_admin_ui_render_field')) {
 	function jcem_admin_ui_render_field($pluginslug, $fieldargs, $values, $value_callback = 'jcem_admin_ui_get_value')
 	{
+		//eval field condition
+		if (isset($fieldargs['condition'])) {
+			if (empty($fieldargs['condition'])) {
+				return;
+			}
+		}
+
 		$pluginslug = sanitize_title($pluginslug);
 		$label = isset($fieldargs['label']) ? $fieldargs['label'] : '';
 		$name = !empty($fieldargs['id']) ? $fieldargs['id'] : "";
@@ -91,21 +96,27 @@ if (!function_exists('jcem_admin_ui_render_field')) {
 						<tbody>
 							<?php
 							foreach ($fieldargs['fields'] as $field) {
+								$condition = true;
+								if (isset($field['condition'])) {
+									$condition = !empty($field['condition']);
+								}
+								if ($condition) {
 							?><tr><?php
-												if ($field['input_type'] != 'fieldset' &&  $field['input_type'] != 'div') {
-													$field_label = isset($field['label']) ? $field['label'] : '';
-													$field_name = !empty($field['id']) ? $field['id'] : "";
-													$field_id = $pluginslug . '-' . sanitize_title($field_name); ?><td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $field_id; ?>"><?php echo $field_label; ?></label></td>
-										<td><?php
+										if ($field['input_type'] != 'fieldset' &&  $field['input_type'] != 'div') {
+											$field_label = isset($field['label']) ? $field['label'] : '';
+											$field_name = !empty($field['id']) ? $field['id'] : "";
+											$field_id = $pluginslug . '-' . sanitize_title($field_name); ?><td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $field_id; ?>"><?php echo $field_label; ?></label></td>
+											<td><?php
 												} else {
-											?>
-										<td colspan="2" class="jcem-admin-ui-single-cell">
-										<?php
+													?>
+											<td colspan="2" class="jcem-admin-ui-single-cell">
+											<?php
 												}
 												jcem_admin_ui_render_field($pluginslug, $field, $values, $value_callback); ?></td>
-								<tr><?php
-								}
-									?>
+									<tr><?php
+										}
+									}
+											?>
 						</tbody>
 					</table>
 				</fieldset>
@@ -137,18 +148,24 @@ if (!function_exists('jcem_admin_ui_render_field')) {
 			?>
 				<table id="<?php echo $pluginslug; ?>-table-<?php echo $id; ?>" class="jcem-admin-ui-table <?php echo $pluginslug; ?>-table">
 					<tbody><?php
-							foreach ($fieldargs['options'] as $option) { ?>
-							<tr>
-								<?php if (isset($option['label'])) { ?>
-									<td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $id . '-' . $counter; ?>"><?php echo $option['label']; ?></label></td>
-								<?php } ?>
-								<td><input class="jcem-admin-ui-field <?php echo $pluginslug; ?>-field <?php echo $classes; ?>" type="<?php echo $type; ?>" name="<?php echo $name; ?>" id="<?php echo $id . '-' . $counter++; ?>" value="<?php echo $option['id']; ?>" <?php echo ($option['id'] == $value) ? 'checked' : '';
-																																																																		echo $attributes; ?>>
-									<span><?php echo (isset($option['description']) ? $option['description'] : ''); ?></span>
-								</td>
-							</tr>
+									foreach ($fieldargs['options'] as $option) {
+										$condition = true;
+										if (isset($option['condition'])) {
+											$condition = !empty($option['condition']);
+										}
+										if ($condition) { ?>
+								<tr>
+									<?php if (isset($option['label'])) { ?>
+										<td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $id . '-' . $counter; ?>"><?php echo $option['label']; ?></label></td>
+									<?php } ?>
+									<td><input class="jcem-admin-ui-field <?php echo $pluginslug; ?>-field <?php echo $classes; ?>" type="<?php echo $type; ?>" name="<?php echo $name; ?>" id="<?php echo $id . '-' . $counter++; ?>" value="<?php echo $option['id']; ?>" <?php echo ($option['id'] == $value) ? 'checked' : '';
+																																																																																																																													echo $attributes; ?>>
+										<span><?php echo (isset($option['description']) ? $option['description'] : ''); ?></span>
+									</td>
+								</tr>
 						<?php
-							}
+										}
+									}
 						?>
 					</tbody>
 				</table>
@@ -167,7 +184,7 @@ if (!function_exists('jcem_admin_ui_render_field')) {
 			case 'checkbox':
 			?>
 				<input class="jcem-admin-ui-field <?php echo $pluginslug; ?>-field <?php echo $classes; ?>" type="<?php echo $type; ?>" name="<?php echo $name; ?>" id="<?php echo $id; ?>" <?php echo $input_val ? 'checked' : '';
-																																															echo $attributes; ?> />
+																																																																																										echo $attributes; ?> />
 				<span><?php echo $description; ?></span>
 			<?php
 				break;
@@ -213,13 +230,13 @@ if (!function_exists('jcem_admin_ui_render_field')) {
 				<!-- Your add & remove image links -->
 				<p class="jcem-admin-ui-hide-if-no-js">
 					<a class="jcem-admin-ui-add-img <?php if ($value) {
-														echo 'hidden';
-													} ?>" href="<?php echo $upload_link ?>" onclick="jcem_admin_ui_add_img(event, '<?php echo $pluginslug; ?>', '#<?php echo $id; ?>')">
+																						echo 'hidden';
+																					} ?>" href="<?php echo $upload_link ?>" onclick="jcem_admin_ui_add_img(event, '<?php echo $pluginslug; ?>', '#<?php echo $id; ?>')">
 						<?php _e('Set custom image') ?>
 					</a>
 					<a class="jcem-admin-ui-delete-img <?php if (!$value) {
-															echo 'hidden';
-														} ?>" href="#" onclick="jcem_admin_ui_delete_img(event, '<?php echo $pluginslug; ?>', '#<?php echo $id; ?>')">
+																								echo 'hidden';
+																							} ?>" href="#" onclick="jcem_admin_ui_delete_img(event, '<?php echo $pluginslug; ?>', '#<?php echo $id; ?>')">
 						<?php _e('Remove this image') ?>
 					</a>
 				</p>
@@ -268,24 +285,30 @@ if (!function_exists('jcem_admin_ui_render_form')) {
 								<?php
 								foreach ($group['fields'] as $field) {
 								?><tr><?php
-											if ($field['input_type'] != 'fieldset' &&  $field['input_type'] != 'div' && isset($field['label'])) {
-												$field_label = isset($field['label']) ? $field['label'] : '';
-												$field_name = !empty($field['id']) ? $field['id'] : "";
-												$field_id = $pluginslug . '-' . sanitize_title($field_name); ?><td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $field_id; ?>"><?php echo $field_label; ?></label></td>
-											<td><?php
-											} else {
-												?>
-											<td colspan="2" class="jcem-admin-ui-single-cell">
-											<?php
+											$condition = true;
+											if (isset($field['condition'])) {
+												$condition = !empty($field['condition']);
 											}
-											jcem_admin_ui_render_field($pluginslug, $field, $values, $value_callback); ?></td>
+											if ($condition) {
+												if ($field['input_type'] != 'fieldset' &&  $field['input_type'] != 'div' && isset($field['label'])) {
+													$field_label = isset($field['label']) ? $field['label'] : '';
+													$field_name = !empty($field['id']) ? $field['id'] : "";
+													$field_id = $pluginslug . '-' . sanitize_title($field_name); ?><td><label class="jcem-admin-ui-fieldlabel" for="<?php echo $field_id; ?>"><?php echo $field_label; ?></label></td>
+												<td><?php
+													} else {
+														?>
+												<td colspan="2" class="jcem-admin-ui-single-cell">
+											<?php
+													}
+													jcem_admin_ui_render_field($pluginslug, $field, $values, $value_callback);
+												} ?></td>
 									<tr><?php
-									}
-										?>
+										}
+											?>
 							</tbody>
 						</table>
 					</div> <?php
-						} ?>
+								} ?>
 			</div>
 		</div>
 <?php
